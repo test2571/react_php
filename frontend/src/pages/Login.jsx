@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { validateLoginForm } from "./../utils/admin/loginValidation.js";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -7,6 +8,8 @@ function Login() {
     password: "",
   });
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,34 +23,40 @@ function Login() {
     e.preventDefault();
     setMessage("");
 
-    fetch("http://localhost/react_php/backend/admin/login.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("success : ", data);
-        if (data.status === "success") {
-          setMessage("Successfully logged in!");
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 2000);
-        } else {
-          console.error("Login failed:", data.message);
-          setMessage("Invalid Credentials, Please try again.");
-          setFormData({
-            username: "",
-            password: "",
-          });
-        }
+    const loginValidationErrors = validateLoginForm(formData);
+    setErrors(loginValidationErrors);
+
+    if (Object.keys(loginValidationErrors).length === 0) {
+      setLoading(true);
+
+      fetch("http://localhost/react_php_local/backend/admin/login.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       })
-      .catch((error) => {
-        console.error("error : ", error);
-        setMessage("Something Went Wrong, Please try again later.");
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            setMessage("Successfully logged in!");
+            setTimeout(() => {
+              navigate("/dashboard");
+            }, 2000);
+          } else {
+            setMessage(data.message);
+            setFormData({
+              username: "",
+              password: "",
+            });
+            setLoading(false);
+          }
+        })
+        .catch((error) => {
+          setMessage("Something Went Wrong, Please try again later.", error);
+          setLoading(false);
+        });
+    }
   };
 
   return (
@@ -83,6 +92,9 @@ function Login() {
                   className="form-control"
                   placeholder="Enter Your Username"
                 />
+                {errors.username && (
+                  <small className="text-danger">{errors.username}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="password" className="form-label">
@@ -97,10 +109,17 @@ function Login() {
                   className="form-control"
                   placeholder="Enter Your Password"
                 />
+                {errors.password && (
+                  <small className="text-danger">{errors.password}</small>
+                )}
               </div>
               <div className="d-grid gap-2">
-                <button type="submit" className="btn btn-primary">
-                  Login
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? "Loading..." : "Login"}
                 </button>
               </div>
             </form>

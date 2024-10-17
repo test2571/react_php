@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { validateRegisterForm } from "./../utils/admin/registerValidation.js";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -11,43 +12,55 @@ function Register() {
     status: "Active",
   });
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setMessage("");
 
-    fetch("http://localhost/react_php/backend/admin/register.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success: ", data);
-        if (data.status === "success") {
-          setMessage("Successfully Registered! Please Login!");
-          setTimeout(() => {
-            navigate("/");
-          }, 2000);
-        } else {
-          console.error("Register failed:", data.message);
-          setMessage("Coundn't Register, Please try again.");
-          setFormData({
-            username: "",
-            email: "",
-            password: "",
-            fullname: "",
-            phoneno: "",
-            status: "Active",
-          });
-        }
+    const registerValidationErrors = validateRegisterForm(formData);
+    setErrors(registerValidationErrors);
+
+    if (Object.keys(registerValidationErrors).length === 0) {
+      setLoading(true);
+
+      fetch("http://localhost/react_php_local/backend/admin/register.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       })
-      .catch((error) => {
-        console.error("error : ", error);
-        setMessage("Something Went Wrong, Please try again later.");
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            setMessage("Successfully Registered! Please Login!");
+            setTimeout(() => {
+              navigate("/");
+            }, 2000);
+          } else {
+            setMessage(data.message);
+            setFormData({
+              username: "",
+              email: "",
+              password: "",
+              fullname: "",
+              phoneno: "",
+              status: "Active",
+            });
+            setLoading(false);
+          }
+        })
+        .catch((error) => {
+          setMessage(
+            "This username already exists. try something else.",
+            error
+          );
+          setLoading(false);
+        });
+    }
   };
 
   const handleChange = (e) => {
@@ -89,6 +102,9 @@ function Register() {
                   className="form-control"
                   placeholder="Enter Your Username"
                 />
+                {errors.username && (
+                  <small className="text-danger">{errors.username}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="email" className="form-label">
@@ -103,6 +119,9 @@ function Register() {
                   className="form-control"
                   placeholder="Enter Your Email"
                 />
+                {errors.email && (
+                  <small className="text-danger">{errors.email}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="password" className="form-label">
@@ -117,6 +136,9 @@ function Register() {
                   className="form-control"
                   placeholder="Enter Your Password"
                 />
+                {errors.password && (
+                  <small className="text-danger">{errors.password}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="fullname" className="form-label">
@@ -131,6 +153,9 @@ function Register() {
                   className="form-control"
                   placeholder="Enter Your Full Name"
                 />
+                {errors.fullname && (
+                  <small className="text-danger">{errors.fullname}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="phoneno" className="form-label">
@@ -145,6 +170,9 @@ function Register() {
                   className="form-control"
                   placeholder="Enter Your Phone No"
                 />
+                {errors.phoneno && (
+                  <small className="text-danger">{errors.phoneno}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="status" className="form-label">
@@ -162,8 +190,12 @@ function Register() {
                 </select>
               </div>
               <div className="d-grid gap-2">
-                <button type="submit" className="btn btn-primary">
-                  Register
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={loading}
+                >
+                  {loading ? "Loading..." : "Register"}
                 </button>
               </div>
             </form>
