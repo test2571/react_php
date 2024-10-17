@@ -22,7 +22,7 @@ if (isset($data->username) && isset($data->password)) {
     if ($result->num_rows === 1) {
         echo json_encode(["status" => "success", "message" => "Logged In successfully"]);
     } else {
-        echo json_encode(["status" => "error", "message" => "Error: " . $conn->error]);
+        echo json_encode(["status" => "error", "message" => "Invalid username or password"]);
     }
 } else {
     echo json_encode(["status" => "error", "message" => "Invalid input"]);

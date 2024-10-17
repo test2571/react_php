@@ -24,7 +24,12 @@ if (isset($data->username) && isset($data->email) && isset($data->password) && i
     if ($stmt->execute()) {
         echo json_encode(["status" => "success", "message" => "Registered Successfully"]);
     } else {
-        echo json_encode(["status" => "error", "message" => "Error: " . $conn->error]);
+        if ($stmt->errno === 1062 && strpos($stmt->error, "'username'") !== false) {
+            echo json_encode(["status" => "error", "message" => "Username already exists. Please choose another."]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Error: Could not register. Please try again. Error details: " . $stmt->error]);
+        }
+
     }
 } else {
     echo json_encode(["status" => "error", "message" => "Invalid input"]);
