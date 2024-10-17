@@ -40,6 +40,7 @@ function Login() {
         .then((data) => {
           if (data.status === "success") {
             setMessage("Successfully logged in!");
+            localStorage.setItem("adminId", data.adminId);
             setTimeout(() => {
               navigate("/dashboard");
             }, 2000);
