@@ -1,0 +1,28 @@
+.custom-card {
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 15px;
+}
+
+.custom-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-header {
+  background: linear-gradient(to right, #16423c, #6a9c89);
+  border-radius: 10px;
+  color: white;
+}
+
+.dashboard-header h1 {
+  font-weight: bold;
+}
+
+.dashboard-header p {
+  font-size: 1.25rem;
+}
+
+.custom-card .btn-dark {
+  background-color: #333;
+  color: white;
+}

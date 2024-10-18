@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { validateLoginForm } from "./../utils/admin/loginValidation.js";
+import { AdminContext } from "../context/AdminContext.jsx";
 
 function Login() {
+  const { handleLoginContext } = useContext(AdminContext);
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -40,7 +42,7 @@ function Login() {
         .then((data) => {
           if (data.status === "success") {
             setMessage("Successfully logged in!");
-            localStorage.setItem("adminId", data.adminId);
+            handleLoginContext(data.adminId);
             setTimeout(() => {
               navigate("/dashboard");
             }, 2000);
