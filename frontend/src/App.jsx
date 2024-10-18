@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Register from "./pages/Register.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminProvider from "./context/AdminContext.jsx";
+import Profile from "./pages/Profile.jsx";
 
 function App() {
   return (
@@ -21,6 +22,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />

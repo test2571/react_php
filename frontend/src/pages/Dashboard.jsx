@@ -1,13 +1,10 @@
 import React, { useContext } from "react";
-import {
-  FaPlus,
-  FaList,
-  FaProductHunt,
-  FaUser,
-  FaSignOutAlt,
-} from "react-icons/fa";
+import { FaEye, FaUser, FaSignOutAlt } from "react-icons/fa";
+import { MdCategory } from "react-icons/md";
+import { BiSolidBinoculars } from "react-icons/bi";
+import { AiFillProduct } from "react-icons/ai";
 import "./../../public/css/dashboard.css";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AdminContext } from "../context/AdminContext.jsx";
 
 function Dashboard() {
@@ -39,7 +36,7 @@ function Dashboard() {
             style={{ backgroundColor: "#EAF6FF" }}
           >
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
-              <FaPlus size={60} className="mb-3 text-primary" />
+              <MdCategory size={60} className="mb-3 text-primary" />
               <h5 className="card-title">Add Category</h5>
               <button className="btn btn-primary btn-lg mt-3 px-4">
                 Go to Add Category
@@ -55,7 +52,7 @@ function Dashboard() {
             style={{ backgroundColor: "#FFF8E0" }}
           >
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
-              <FaProductHunt size={60} className="mb-3 text-warning" />
+              <AiFillProduct size={60} className="mb-3 text-warning" />
               <h5 className="card-title">Add Product</h5>
               <button className="btn btn-warning btn-lg mt-3 px-4">
                 Go to Add Product
@@ -73,9 +70,11 @@ function Dashboard() {
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
               <FaUser size={60} className="mb-3 text-danger" />
               <h5 className="card-title">Admin Profile</h5>
-              <button className="btn btn-danger btn-lg mt-3 px-4">
-                Go to Admin Profile
-              </button>
+              <Link to="/profile">
+                <button className="btn btn-danger btn-lg mt-3 px-4">
+                  Go to Admin Profile
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -87,7 +86,7 @@ function Dashboard() {
             style={{ backgroundColor: "#ECFFED" }}
           >
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
-              <FaList size={60} className="mb-3 text-success" />
+              <FaEye size={60} className="mb-3 text-success" />
               <h5 className="card-title">View Category</h5>
               <button className="btn btn-success btn-lg mt-3 px-4">
                 Go to View Category
@@ -103,7 +102,7 @@ function Dashboard() {
             style={{ backgroundColor: "#E3F8FF" }}
           >
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
-              <FaList size={60} className="mb-3 text-info" />
+              <BiSolidBinoculars size={60} className="mb-3 text-info" />
               <h5 className="card-title">View Product</h5>
               <button className="btn btn-info btn-lg mt-3 px-4">
                 Go to View Product
