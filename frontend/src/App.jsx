@@ -7,6 +7,7 @@ import Register from "./pages/Register.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminProvider from "./context/AdminContext.jsx";
 import Profile from "./pages/Profile.jsx";
+import UpdatePassword from "./pages/UpdatePassword.jsx";
 
 function App() {
   return (
@@ -30,6 +31,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/updatePassword"
+            element={
+              <ProtectedRoute>
+                <UpdatePassword />
               </ProtectedRoute>
             }
           />

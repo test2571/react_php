@@ -3,10 +3,19 @@ import { FaUserEdit, FaTimesCircle, FaCheckCircle } from "react-icons/fa";
 import { FaPhone } from "react-icons/fa6";
 import { MdMarkEmailUnread, MdDriveFileRenameOutline } from "react-icons/md";
 import { AdminContext } from "../context/AdminContext.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Profile() {
-  const { adminDetails } = useContext(AdminContext);
+  const { adminDetails, handleLogoutContext } = useContext(AdminContext);
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    const isConfirm = confirm("Do you really want to logout? ");
+
+    if (isConfirm) {
+      handleLogoutContext();
+      navigate("/");
+    }
+  };
 
   const renderStatusIcon = (status) => {
     if (status === "Active") {
@@ -88,8 +97,12 @@ function Profile() {
           <Link to="/dashboard">
             <button className="btn btn-light me-2">Back to Dashboard</button>
           </Link>
-          <button className="btn btn-dark me-2">Update Password</button>
-          <button className="btn btn-light me-2">Logout</button>
+          <Link to="/updatePassword">
+            <button className="btn btn-dark me-2">Update Password</button>
+          </Link>
+          <button onClick={handleLogout} className="btn btn-light me-2">
+            Logout
+          </button>
         </div>
       </div>
     </div>
