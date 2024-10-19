@@ -8,6 +8,8 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminProvider from "./context/AdminContext.jsx";
 import Profile from "./pages/Profile.jsx";
 import UpdatePassword from "./pages/UpdatePassword.jsx";
+import CategoryForm from "./pages/CategoryForm.jsx";
+import CategoryList from "./pages/CategoryList.jsx";
 
 function App() {
   return (
@@ -39,6 +41,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <UpdatePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addCategory"
+            element={
+              <ProtectedRoute>
+                <CategoryForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/viewCategory"
+            element={
+              <ProtectedRoute>
+                <CategoryList />
               </ProtectedRoute>
             }
           />

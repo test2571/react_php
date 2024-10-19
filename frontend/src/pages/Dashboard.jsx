@@ -24,7 +24,7 @@ function Dashboard() {
     <div className="container mt-5">
       {/* Welcome Message */}
       <div className="dashboard-header text-center p-4 mb-5">
-        <h1 className="display-4">Welcome, {adminDetails.username}</h1>
+        <h1 className="display-4">Welcome, @{adminDetails.username}</h1>
         <p>Your Dashboard - Manage categories, products, and your profile.</p>
       </div>
 
@@ -38,9 +38,11 @@ function Dashboard() {
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
               <MdCategory size={60} className="mb-3 text-primary" />
               <h5 className="card-title">Add Category</h5>
-              <button className="btn btn-primary btn-lg mt-3 px-4">
-                Go to Add Category
-              </button>
+              <Link to="/addCategory">
+                <button className="btn btn-primary btn-lg mt-3 px-4">
+                  Go to Add Category
+                </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -88,9 +90,11 @@ function Dashboard() {
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
               <FaEye size={60} className="mb-3 text-success" />
               <h5 className="card-title">View Category</h5>
-              <button className="btn btn-success btn-lg mt-3 px-4">
-                Go to View Category
-              </button>
+              <Link to="/viewCategory">
+                <button className="btn btn-success btn-lg mt-3 px-4">
+                  Go to View Category
+                </button>
+              </Link>
             </div>
           </div>
         </div>
