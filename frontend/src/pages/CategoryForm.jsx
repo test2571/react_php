@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { categoryValidation } from "./../utils/category/categoryValidation.js";
 
 function CategoryForm() {
+  const [searchParams] = useSearchParams();
+  const cid = searchParams.get("cid");
+
   const [formData, setFormData] = useState({
     categoryName: "",
     parentCategory: "",
@@ -21,6 +24,30 @@ function CategoryForm() {
       .catch((error) => console.error("Error fetching categories:", error));
   }, []);
 
+  useEffect(() => {
+    if (cid) {
+      fetch(
+        `http://localhost/react_php_local/backend/category/getCategory.php?cid=${cid}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            setFormData({
+              categoryName: data.message.category_name || "",
+              parentCategory: data.message.parent_id || "0",
+              status: data.message.status || "Active",
+            });
+          } else {
+            setMessage("Category not found!");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching category data: ", error);
+          setMessage("Error fetching category data.");
+        });
+    }
+  }, [cid]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -30,9 +57,7 @@ function CategoryForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
     setMessage("");
-
     const categoryValidationErrors = categoryValidation(formData);
     setErrors(categoryValidationErrors);
 
@@ -41,13 +66,14 @@ function CategoryForm() {
     const formDataWithId = {
       ...formData,
       adminId: adminId,
+      ...(cid && { categoryId: cid }),
     };
 
     if (Object.keys(categoryValidationErrors).length === 0) {
       setLoading(true);
 
       fetch(
-        "http://localhost/react_php_local/backend/category/addCategory.php",
+        `http://localhost/react_php_local/backend/category/addCategory.php`,
         {
           method: "POST",
           headers: {
@@ -59,7 +85,11 @@ function CategoryForm() {
         .then((response) => response.json())
         .then((data) => {
           if (data.status === "success") {
-            setMessage("Category added successfully!");
+            setMessage(
+              cid
+                ? "Category updated successfully!"
+                : "Category added successfully!"
+            );
             setTimeout(() => {
               navigate("/viewCategory");
             }, 2000);
@@ -74,7 +104,7 @@ function CategoryForm() {
           }
         })
         .catch((error) => {
-          setMessage("Something went wrong. Please try again later.", error);
+          setMessage("Something went wrong. Please try again later.");
           setFormData({
             categoryName: "",
             parentCategory: "",
@@ -90,20 +120,18 @@ function CategoryForm() {
       <div className="row justify-content-center">
         <div className="col-md-6">
           <div className="card p-4 shadow">
-            <h1 className="text-center mb-4">Category Form</h1>
-
+            <h1 className="text-center mb-4">
+              {cid ? "Edit Category" : "Add Category"}
+            </h1>{" "}
             {message && (
               <div
                 className={`alert ${
-                  message === "Category added successfully!"
-                    ? "alert-success"
-                    : "alert-danger"
+                  message.includes("success") ? "alert-success" : "alert-danger"
                 }`}
               >
                 {message}
               </div>
             )}
-
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="categoryName" className="form-label">
@@ -173,11 +201,14 @@ function CategoryForm() {
                   className="btn btn-primary"
                   disabled={loading}
                 >
-                  {loading ? "Loading..." : "Add Category"}
+                  {loading
+                    ? "Loading..."
+                    : cid
+                    ? "Update Category"
+                    : "Add Category"}{" "}
                 </button>
               </div>
             </form>
-
             <div className="mt-4 text-center">
               <Link
                 to="/dashboard"

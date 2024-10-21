@@ -8,7 +8,7 @@ $errorMsg = '';
 
 if (isset($data->categoryName) && isset($data->parentCategory) && isset($data->status) && $data->adminId) {
     $categoryName = trim($data->categoryName);
-    $parentCategory = $data->parentCategory === 0 ? null : $data->parentCategory;
+    $parentCategory = $data->parentCategory == 0 ? null : $data->parentCategory;
     $status = trim($data->status);
     $adminId = $data->adminId;
 
@@ -21,7 +21,7 @@ if (isset($data->categoryName) && isset($data->parentCategory) && isset($data->s
 
     if (empty($errorMsg)) {
         if (is_null($parentCategory)) {
-            $level = 1; // No parent category, set level to 1
+            $level = 1;
         } else {
             $parentQuery = "SELECT level FROM category WHERE category_id = ?";
             $parentstmt = $conn->prepare($parentQuery);
@@ -38,14 +38,28 @@ if (isset($data->categoryName) && isset($data->parentCategory) && isset($data->s
         }
 
         if (empty($errorMsg)) {
-            $sql = "INSERT INTO category (category_name, parent_id, level, status, created_by) VALUES (?,?,?,?,?)";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param('siisi', $categoryName, $parentCategory, $level, $status, $adminId);
+            if (isset($data->categoryId) && !empty($data->categoryId)) {
+                $categoryId = $data->categoryId;
+                $sql = "UPDATE category set category_name = ?, parent_id = ?, level = ?, status = ?, created_by = ? WHERE category_id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('siisii', $categoryName, $parentCategory, $level, $status, $adminId, $categoryId);
 
-            if ($stmt->execute()) {
-                echo json_encode(["status" => "success", "message" => "Category added Successfully"]);
-            } else {
-                echo json_encode(["status" => "error", "message" => "Could not add category. Please try again later."]);
+                if ($stmt->execute()) {
+                    echo json_encode(['status' => 'success', 'message' => 'Category updated successfully!']);
+                } else {
+                    echo json_encode(['status' => 'error', 'message' => 'Could not update category. Please try again later.']);
+                }
+
+            }else{
+                $sql = 'INSERT INTO category (category_name, parent_id, level, status, created_by) VALUES (?,?,?,?,?)';
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param('siisi', $categoryName, $parentCategory, $level, $status, $adminId);
+
+                if($stmt->execute()){
+                    echo json_encode(['status'=> 'success', 'message'=> 'Category added successfully!']);
+                }else{
+                    echo json_encode(['status' => 'error', 'message' => 'Could not add category. Please try again later.']);
+                }
             }
         } else {
             echo json_encode(["status" => "error", "message" => $errorMsg]);

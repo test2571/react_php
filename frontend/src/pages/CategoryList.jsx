@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function CategoryList() {
   const recordsPerPage = 5;
@@ -8,6 +9,7 @@ function CategoryList() {
   const [totalPages, setTotalPages] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
@@ -68,6 +70,10 @@ function CategoryList() {
     }
   };
 
+  const handleEdit = (categoryId) => {
+    navigate(`/addCategory?cid=${categoryId}`);
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="mb-3">Categories</h1>
@@ -89,8 +95,15 @@ function CategoryList() {
           onChange={handleSearch}
           style={{ marginRight: "20px" }}
         />
-        <a href="/addCategory" className="btn btn-primary">
+        <a
+          href="/addCategory"
+          className="btn btn-primary"
+          style={{ marginRight: "20px" }}
+        >
           Add Category
+        </a>
+        <a href="/dashboard" className="btn btn-dark">
+          Go to Dashboard
         </a>
       </div>
       {/* category list */}
@@ -114,8 +127,8 @@ function CategoryList() {
                 <td>{category.level}</td>
                 <td>
                   <a
-                    href="#"
                     className="btn btn-success btn-sm mr-2"
+                    onClick={() => handleEdit(category.category_id)}
                     style={{ marginRight: "10px" }}
                   >
                     Edit
