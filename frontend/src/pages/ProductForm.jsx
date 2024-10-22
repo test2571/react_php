@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import $ from "jquery";
+import { productValidation } from "./../utils/product/productValidation.js";
 
 function ProductForm() {
   const [formData, setFormData] = useState({
@@ -20,8 +22,10 @@ function ProductForm() {
   });
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [files, setFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,6 +39,20 @@ function ProductForm() {
     const { name, value, files: selectedFiles } = e.target;
     if (name === "images") {
       setFiles(selectedFiles);
+
+      // preview images
+      const fileArray = Array.from(selectedFiles);
+      const previewUrls = fileArray.map((file) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        return new Promise((resolve) => {
+          reader.onloadend = () => {
+            resolve(reader.result);
+          };
+        });
+      });
+
+      Promise.all(previewUrls).then((urls) => setImagePreviews(urls));
     } else {
       setFormData({
         ...formData,
@@ -45,55 +63,73 @@ function ProductForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    const adminId = localStorage.getItem("adminId");
-
-    const formDataWithFiles = new FormData();
-    formDataWithFiles.append("adminId", adminId);
-
-    Object.keys(formData).forEach((key) => {
-      formDataWithFiles.append(key, formData[key]);
-    });
-
-    for (let i = 0; i < files.length; i++) {
-      formDataWithFiles.append("images[]", files[i]);
-    }
-
-    fetch(`http://localhost/react_php_local/backend/product/addProduct.php`, {
-      method: "POST",
-      body: formDataWithFiles,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.status === "success") {
-          setMessage(data.message);
-          navigate("/dashboard");
-        } else {
-          setMessage(data.message);
-          setLoading(false);
-          setFormData({
-            productName: "",
-            sku: "",
-            color: "",
-            size: "",
-            description: "",
-            images: [],
-            category: "",
-            price: "",
-            discount: "",
-            stockQuantity: "",
-            mfrCost: "",
-            shippingCost: "",
-            minPrice: "",
-            status: "In Stock",
-          });
-          setFiles([]);
-        }
-      })
-      .catch((error) => {
-        setMessage("Failed to add product. Please try again.");
-        setLoading(false);
+    setErrors({});
+    setMessage("");
+    if (formData.stockQuantity === "0") {
+      $("#status").val("Out Of Stock");
+      setFormData({
+        ...formData,
+        status: "Out Of Stock",
       });
+      alert("Stock is 0. Status set to 'Out Of Stock'.");
+    }
+    const productValidationErrors = productValidation(formData);
+    setErrors(productValidationErrors);
+
+    if (Object.keys(productValidationErrors).length === 0) {
+      setLoading(true);
+      const adminId = localStorage.getItem("adminId");
+
+      const formDataWithFiles = new FormData();
+      formDataWithFiles.append("adminId", adminId);
+
+      Object.keys(formData).forEach((key) => {
+        formDataWithFiles.append(key, formData[key]);
+      });
+
+      for (let i = 0; i < files.length; i++) {
+        formDataWithFiles.append("images[]", files[i]);
+      }
+
+      fetch(`http://localhost/react_php_local/backend/product/addProduct.php`, {
+        method: "POST",
+        body: formDataWithFiles,
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            setMessage("Product added successfully!");
+            setTimeout(() => {
+              navigate("/viewProduct");
+            }, 2000);
+          } else {
+            setMessage(data.message);
+            setLoading(false);
+            setFormData({
+              productName: "",
+              sku: "",
+              color: "",
+              size: "",
+              description: "",
+              images: [],
+              category: "",
+              price: "",
+              discount: "",
+              stockQuantity: "",
+              mfrCost: "",
+              shippingCost: "",
+              minPrice: "",
+              status: "In Stock",
+            });
+            setFiles([]);
+            setErrors({});
+          }
+        })
+        .catch((error) => {
+          setMessage("Failed to add product. Please try again.");
+          setLoading(false);
+        });
+    }
   };
 
   return (
@@ -126,6 +162,9 @@ function ProductForm() {
                   className="form-control"
                   placeholder="Enter Product Name"
                 />
+                {errors.productName && (
+                  <small className="text-danger">{errors.productName}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="sku" className="form-label">
@@ -141,6 +180,9 @@ function ProductForm() {
                   className="form-control"
                   placeholder="Enter Product Name"
                 />
+                {errors.sku && (
+                  <small className="text-danger">{errors.sku}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="color" className="form-label">
@@ -166,6 +208,9 @@ function ProductForm() {
                   <option value="pink">Pink</option>
                   <option value="gray">Gray</option>
                 </select>
+                {errors.color && (
+                  <small className="text-danger">{errors.color}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="size" className="form-label">
@@ -189,6 +234,9 @@ function ProductForm() {
                   <option value="extra-large">Extra Large</option>
                   <option value="XXL">XXL</option>
                 </select>
+                {errors.size && (
+                  <small className="text-danger">{errors.size}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="description" className="form-label">
@@ -204,6 +252,9 @@ function ProductForm() {
                   className="form-control"
                   placeholder="Enter Description Here"
                 />
+                {errors.description && (
+                  <small className="text-danger">{errors.description}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="images" className="form-label">
@@ -218,6 +269,26 @@ function ProductForm() {
                   name="images"
                   className="form-control"
                 />
+              </div>
+
+              {/* Image Previews */}
+              <div id="image-preview-react" className="mb-3">
+                {imagePreviews.map((image, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "inline-block",
+                      margin: "10px",
+                      position: "relative",
+                    }}
+                  >
+                    <img
+                      src={image}
+                      alt={`Preview ${index}`}
+                      style={{ maxWidth: "100px", height: "auto" }}
+                    />
+                  </div>
+                ))}
               </div>
               <div className="mb-3">
                 <label htmlFor="category" className="form-label">
@@ -257,6 +328,9 @@ function ProductForm() {
                   className="form-control"
                   placeholder="Enter Price here"
                 />
+                {errors.price && (
+                  <small className="text-danger">{errors.price}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="discount" className="form-label">
@@ -276,6 +350,11 @@ function ProductForm() {
                 <small id="discountHelp" className="form-text text-muted">
                   Enter 0 if there is no discount.
                 </small>
+                <div>
+                  {errors.discount && (
+                    <small className="text-danger">{errors.discount}</small>
+                  )}
+                </div>
               </div>
               <div className="mb-3">
                 <label htmlFor="stockQuantity" className="form-label">
@@ -292,6 +371,9 @@ function ProductForm() {
                   className="form-control"
                   placeholder="Enter Stock Quantity here"
                 />
+                {errors.stockQuantity && (
+                  <small className="text-danger">{errors.stockQuantity}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="mfrCost" className="form-label">
@@ -308,6 +390,9 @@ function ProductForm() {
                   className="form-control"
                   placeholder="Enter Manufacturer Cost here"
                 />
+                {errors.mfrCost && (
+                  <small className="text-danger">{errors.mfrCost}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="shippingCost" className="form-label">
@@ -324,6 +409,9 @@ function ProductForm() {
                   className="form-control"
                   placeholder="Enter Shipping Cost here"
                 />
+                {errors.shippingCost && (
+                  <small className="text-danger">{errors.shippingCost}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="minPrice" className="form-label">
@@ -340,6 +428,9 @@ function ProductForm() {
                   className="form-control"
                   placeholder="Enter Min Price here"
                 />
+                {errors.minPrice && (
+                  <small className="text-danger">{errors.minPrice}</small>
+                )}
               </div>
               <div className="mb-3">
                 <label htmlFor="status" className="form-label">
@@ -368,6 +459,14 @@ function ProductForm() {
                 </button>
               </div>
             </form>
+            <div className="mt-4 text-center">
+              <Link
+                to="/dashboard"
+                className="text-decoration-none text-white bg-dark p-2 rounded"
+              >
+                Back to Dashboard
+              </Link>
+            </div>
           </div>
         </div>
       </div>

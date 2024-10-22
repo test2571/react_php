@@ -110,9 +110,11 @@ function Dashboard() {
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
               <BiSolidBinoculars size={60} className="mb-3 text-info" />
               <h5 className="card-title">View Product</h5>
-              <button className="btn btn-info btn-lg mt-3 px-4">
-                Go to View Product
-              </button>
+              <Link to="/viewProduct">
+                <button className="btn btn-info btn-lg mt-3 px-4">
+                  Go to View Product
+                </button>
+              </Link>
             </div>
           </div>
         </div>

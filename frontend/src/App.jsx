@@ -11,6 +11,7 @@ import UpdatePassword from "./pages/UpdatePassword.jsx";
 import CategoryForm from "./pages/CategoryForm.jsx";
 import CategoryList from "./pages/CategoryList.jsx";
 import ProductForm from "./pages/ProductForm.jsx";
+import ProductList from "./pages/ProductList.jsx";
 
 function App() {
   return (
@@ -66,6 +67,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProductForm />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/viewProduct"
+            element={
+              <ProtectedRoute>
+                <ProductList />
               </ProtectedRoute>
             }
           />
