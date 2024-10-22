@@ -6,7 +6,36 @@ include '../db.php';
 $productId = isset($_GET['pid']) ? intval($_GET['pid']) : 0;
 
 if ($productId > 0) {
-    $sql = 'DELETE FROM product where product_id = ?';
+    $imageSql = 'SELECT image_link FROM product WHERE product_id = ?';
+
+    if ($stmt = $conn->prepare($imageSql)) {
+        $stmt->bind_param('i', $productId);
+
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+
+            if ($row = $result->fetch_assoc()) {
+                $imageLinks = $row['image_link'];
+                if (!empty($imageLinks)) {
+                    $imageArray = explode(',', $imageLinks);
+
+                    foreach ($imageArray as $imagePath) {
+                        $imagePath = '../images/' . trim($imagePath);
+
+                        if (file_exists($imagePath)) {
+                            unlink($imagePath);
+                        }
+                    }
+                }
+            }
+        } else {
+            echo json_encode(["success" => false, "message" => "Error retrieving product images."]);
+            exit;
+        }
+        $stmt->close();
+    }
+
+    $sql = 'DELETE FROM product WHERE product_id = ?';
 
     if ($stmt = $conn->prepare($sql)) {
         $stmt->bind_param('i', $productId);
@@ -18,7 +47,7 @@ if ($productId > 0) {
                 echo json_encode(["success" => false, "message" => "Product not found or already deleted."]);
             }
         } else {
-            echo json_encode(["success" => false, "message" => "Error deleting Product."]);
+            echo json_encode(["success" => false, "message" => "Error deleting product."]);
         }
 
         $stmt->close();
