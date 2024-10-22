@@ -56,9 +56,11 @@ function Dashboard() {
             <div className="card-body d-flex flex-column justify-content-center align-items-center py-5">
               <AiFillProduct size={60} className="mb-3 text-warning" />
               <h5 className="card-title">Add Product</h5>
-              <button className="btn btn-warning btn-lg mt-3 px-4">
-                Go to Add Product
-              </button>
+              <Link to="/addProduct">
+                <button className="btn btn-warning btn-lg mt-3 px-4">
+                  Go to Add Product
+                </button>
+              </Link>
             </div>
           </div>
         </div>

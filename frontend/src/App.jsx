@@ -10,6 +10,7 @@ import Profile from "./pages/Profile.jsx";
 import UpdatePassword from "./pages/UpdatePassword.jsx";
 import CategoryForm from "./pages/CategoryForm.jsx";
 import CategoryList from "./pages/CategoryList.jsx";
+import ProductForm from "./pages/ProductForm.jsx";
 
 function App() {
   return (
@@ -57,6 +58,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CategoryList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addProduct"
+            element={
+              <ProtectedRoute>
+                <ProductForm />
               </ProtectedRoute>
             }
           />
