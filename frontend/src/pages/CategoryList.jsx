@@ -8,6 +8,7 @@ function CategoryList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
 
@@ -74,6 +75,52 @@ function CategoryList() {
     navigate(`/addCategory?cid=${categoryId}`);
   };
 
+  const handleCheckboxChange = (catgegoryId) => {
+    setSelectedCategories((prevSelected) =>
+      prevSelected.includes(catgegoryId)
+        ? prevSelected.filter((id) => id !== catgegoryId)
+        : [...prevSelected, catgegoryId]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    const confirmation = window.confirm(
+      "Are you sure you want to delete the selected categories?"
+    );
+    if (confirmation) {
+      try {
+        const response = await fetch(
+          `http://localhost/react_php_local/backend/category/categoryBulkDelete.php`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ categoryIds: selectedCategories }),
+          }
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          setErrorMessage("");
+          setSuccessMessage(result.message);
+          setSelectedCategories([]);
+        } else {
+          setSuccessMessage("");
+          setErrorMessage(
+            result.message || "An error occurred during deletion!"
+          );
+        }
+
+        fetchCategories();
+      } catch (error) {
+        setSuccessMessage("");
+        setErrorMessage("An error occurred while deleting the categories. foreign key reference!");
+      }
+    }
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="mb-3">Categories</h1>
@@ -106,10 +153,21 @@ function CategoryList() {
           Go to Dashboard
         </a>
       </div>
+
+      {/* Bulk delete button */}
+      {selectedCategories.length > 0 && (
+        <div className="mb-3">
+          <button className="btn btn-danger" onClick={handleBulkDelete}>
+            Delete Selected Categories
+          </button>
+        </div>
+      )}
+
       {/* category list */}
       <table className="table table-bordered">
         <thead>
           <tr>
+            <th>Selected</th>
             <th>Category Id</th>
             <th>Category Name</th>
             <th>Parent Category</th>
@@ -121,6 +179,13 @@ function CategoryList() {
           {categories.length > 0 ? (
             categories.map((category) => (
               <tr key={category.category_id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedCategories.includes(category.category_id)}
+                    onChange={() => handleCheckboxChange(category.category_id)}
+                  />
+                </td>
                 <td>{category.category_id}</td>
                 <td>{category.category_name}</td>
                 <td>{category.parent_category_name || "No Parent"}</td>
