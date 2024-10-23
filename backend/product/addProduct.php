@@ -89,6 +89,24 @@ if (!empty($errorMsg)) {
 }
 
 $target_dir = "../images/";
+$existingImages = [];
+$productId = isset($_POST['pid']) ? intval($_POST['pid']) : null;
+
+if ($productId !== null) {
+    $sql = "SELECT image_link FROM product WHERE product_id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $productId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $existingImages = explode(',', $row['image_link']);
+    } else {
+        echo json_encode(["status" => "error", "message" => "Product not found."]);
+        exit;
+    }
+}
+
 $imageNames = [];
 
 if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
@@ -111,20 +129,55 @@ if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
             exit;
         }
     }
+    $allImages = array_merge($existingImages, $imageNames);
+    $allImages = array_filter($allImages);
+} else {
+    $allImages = $existingImages;
 }
 
-$images = implode(',', $imageNames);
+if (!empty($allImages)) {
+    $images = implode(",", $allImages);
+} else {
+    $images = "";
+}
 
-$sql = "INSERT INTO product (product_name, sku, color, size, description, image_link, category, price, discount, stock_quantity, mfr_cost, shipping_cost, min_price, status, added_by)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+if ($productId === null) {
+    $sql = "INSERT INTO product (product_name, sku, color, size, description, image_link, category, price, discount, stock_quantity, mfr_cost, shipping_cost, min_price, status, added_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param('ssssssiddidddss', $productName, $sku, $color, $size, $description, $images, $category, $price, $discount, $stockQuantity, $mfrCost, $shippingCost, $minPrice, $status, $addedBy);
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ssssssiddidddss', $productName, $sku, $color, $size, $description, $images, $category, $price, $discount, $stockQuantity, $mfrCost, $shippingCost, $minPrice, $status, $addedBy);
+} else {
+    $sql = "UPDATE product SET 
+                product_name = ?, 
+                sku = ?, 
+                color = ?, 
+                size = ?, 
+                description = ?, 
+                image_link = ?, 
+                category = ?, 
+                price = ?, 
+                discount = ?, 
+                stock_quantity = ?, 
+                mfr_cost = ?, 
+                shipping_cost = ?, 
+                min_price = ?, 
+                status = ?, 
+                added_by = ?
+            WHERE product_id = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ssssssiddidddssi', $productName, $sku, $color, $size, $description, $images, $category, $price, $discount, $stockQuantity, $mfrCost, $shippingCost, $minPrice, $status, $addedBy, $productId);
+}
 
 if ($stmt->execute()) {
-    echo json_encode(["status" => "success", "message" => "Product added successfully"]);
+    if ($productId === null) {
+        echo json_encode(["status" => "success", "message" => "Product added successfully"]);
+    } else {
+        echo json_encode(["status" => "success", "message" => "Product updated successfully"]);
+    }
 } else {
-    echo json_encode(["status" => "error", "message" => "Failed to add product"]);
+    echo json_encode(["status" => "error", "message" => "Failed to add or update product"]);
 }
 
 $stmt->close();

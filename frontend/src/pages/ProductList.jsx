@@ -70,6 +70,10 @@ function ProductList() {
     }
   };
 
+  const handleEdit = (productId) => {
+    navigate(`/addProduct?pid=${productId}`);
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="mb-3">Products</h1>
@@ -143,6 +147,7 @@ function ProductList() {
                 <td>
                   <button
                     className="btn btn-success btn-sm"
+                    onClick={() => handleEdit(product.product_id)}
                     style={{ marginRight: "10px" }}
                   >
                     Edit

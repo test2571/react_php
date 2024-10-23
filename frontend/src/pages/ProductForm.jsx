@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import $ from "jquery";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { productValidation } from "./../utils/product/productValidation.js";
 
 function ProductForm() {
+  const [serachParams] = useSearchParams();
+  const pid = serachParams.get("pid");
+
   const [formData, setFormData] = useState({
     productName: "",
     sku: "",
@@ -24,8 +26,10 @@ function ProductForm() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
+  const [imageMessage, setImageMessage] = useState("");
   const [files, setFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [allImagesDeleted, setAllImagesDeleted] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,6 +38,41 @@ function ProductForm() {
       .then((data) => setCategories(data))
       .catch((error) => console.error("Error fetching categories:", error));
   }, []);
+
+  useEffect(() => {
+    if (pid) {
+      fetch(
+        `http://localhost/react_php_local/backend/product/getProduct.php?pid=${pid}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            setFormData({
+              productName: data.message.product_name || "",
+              sku: data.message.sku || "",
+              color: data.message.color || "",
+              size: data.message.size || "",
+              description: data.message.description || "",
+              images: data.message.images || [],
+              category: data.message.category || "",
+              price: data.message.price || "",
+              discount: data.message.discount || "",
+              stockQuantity: data.message.stock_quantity || 0,
+              mfrCost: data.message.mfr_cost || "",
+              shippingCost: data.message.shipping_cost || "",
+              minPrice: data.message.min_price || "",
+              status: data.message.status || "In Stock",
+            });
+          } else {
+            setMessage("Product not found!");
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching product data: ", error);
+          setMessage("Error fetching product data.");
+        });
+    }
+  }, [pid]);
 
   const handleChange = (e) => {
     const { name, value, files: selectedFiles } = e.target;
@@ -61,12 +100,53 @@ function ProductForm() {
     }
   };
 
+  const handleDeleteImage = (image) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this image?"
+    );
+    if (confirmDelete) {
+      const productId = pid;
+
+      fetch(
+        `http://localhost/react_php_local/backend/product/deleteImage.php`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ productId, image }),
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            setFormData((prevData) => {
+              const updatedImages = prevData.images.filter(
+                (img) => img !== image
+              );
+              setAllImagesDeleted(updatedImages.length === 0);
+              return {
+                ...prevData,
+                images: updatedImages,
+              };
+            });
+            setImageMessage("Image deleted successfully!");
+          } else {
+            setImageMessage(data.message || "Failed to delete image.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting image:", error);
+          setImageMessage("Error deleting image. Please try again.");
+        });
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrors({});
     setMessage("");
     if (formData.stockQuantity === "0") {
-      $("#status").val("Out Of Stock");
       setFormData({
         ...formData,
         status: "Out Of Stock",
@@ -91,6 +171,10 @@ function ProductForm() {
         formDataWithFiles.append("images[]", files[i]);
       }
 
+      if (pid) {
+        formDataWithFiles.append("pid", pid);
+      }
+
       fetch(`http://localhost/react_php_local/backend/product/addProduct.php`, {
         method: "POST",
         body: formDataWithFiles,
@@ -98,7 +182,11 @@ function ProductForm() {
         .then((response) => response.json())
         .then((data) => {
           if (data.status === "success") {
-            setMessage("Product added successfully!");
+            if (pid) {
+              setMessage("Product Updated successfully!");
+            } else {
+              setMessage("Product added successfully!");
+            }
             setTimeout(() => {
               navigate("/viewProduct");
             }, 2000);
@@ -137,16 +225,9 @@ function ProductForm() {
       <div className="row justify-content-center">
         <div className="col-md-8">
           <div className="card p-4 shadow">
-            <h1 className="text-center mb-4">Add Product</h1>
-            {message && (
-              <div
-                className={`alert ${
-                  message.includes("success") ? "alert-success" : "alert-danger"
-                }`}
-              >
-                {message}
-              </div>
-            )}
+            <h1 className="text-center mb-4">
+              {pid ? "Edit Product" : "Add Product"}
+            </h1>
             <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="productName" className="form-label">
@@ -263,14 +344,61 @@ function ProductForm() {
                 <input
                   type="file"
                   id="images"
-                  required
+                  required={!pid || allImagesDeleted}
                   onChange={handleChange}
                   multiple
                   name="images"
                   className="form-control"
                 />
               </div>
-
+              <div id="image-preview-react" className="mb-3">
+                {formData.images &&
+                  formData.images.map((image, index) => (
+                    <div
+                      key={`existing-${index}`}
+                      style={{
+                        display: "inline-block",
+                        margin: "10px",
+                        position: "relative",
+                      }}
+                    >
+                      <img
+                        src={`http://localhost/react_php_local/backend/images/${image}`}
+                        alt={`Existing ${index}`}
+                        style={{ maxWidth: "100px", height: "auto" }}
+                      />
+                      <button
+                        type="button"
+                        className="remove-image"
+                        onClick={() => handleDeleteImage(image)}
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          right: 0,
+                          background: "red",
+                          color: "white",
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        X
+                      </button>
+                    </div>
+                  ))}
+                <div>
+                  {imageMessage && (
+                    <small
+                      className={` ${
+                        imageMessage.includes("success")
+                          ? "text-success"
+                          : "text-danger"
+                      }`}
+                    >
+                      {imageMessage}
+                    </small>
+                  )}
+                </div>
+              </div>
               {/* Image Previews */}
               <div id="image-preview-react" className="mb-3">
                 {imagePreviews.map((image, index) => (
@@ -455,8 +583,25 @@ function ProductForm() {
                   className="btn btn-primary"
                   disabled={loading}
                 >
-                  {loading ? "Loading..." : "Add Product"}
+                  {loading
+                    ? "Loading..."
+                    : pid
+                    ? "Update Product"
+                    : "Add Product"}{" "}
                 </button>
+              </div>
+              <div>
+                {message && (
+                  <div
+                    className={`alert mt-3 ${
+                      message.includes("success")
+                        ? "alert-success"
+                        : "alert-danger"
+                    }`}
+                  >
+                    {message}
+                  </div>
+                )}
               </div>
             </form>
             <div className="mt-4 text-center">
