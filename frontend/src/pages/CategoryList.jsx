@@ -121,6 +121,10 @@ function CategoryList() {
     }
   };
 
+  const cancelSelection = () => {
+    setSelectedCategories([]);
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="mb-3">Categories</h1>
@@ -157,8 +161,11 @@ function CategoryList() {
       {/* Bulk delete button */}
       {selectedCategories.length > 0 && (
         <div className="mb-3">
-          <button className="btn btn-danger" onClick={handleBulkDelete}>
+          <button className="btn btn-danger me-2" onClick={handleBulkDelete}>
             Delete Selected Categories
+          </button>
+          <button className="btn btn-success" onClick={cancelSelection}>
+            Unselect All
           </button>
         </div>
       )}

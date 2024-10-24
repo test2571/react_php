@@ -9,6 +9,8 @@ function ProductList() {
   const [totalPages, setTotalPages] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -74,6 +76,66 @@ function ProductList() {
     navigate(`/addProduct?pid=${productId}`);
   };
 
+  const handleCheckboxChange = (productId) => {
+    setSelectedProducts((prevSelected) =>
+      prevSelected.includes(productId)
+        ? prevSelected.filter((id) => id !== productId)
+        : [...prevSelected, productId]
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    const confirmation = window.confirm(
+      "Are you sure you want to delete the selected products? "
+    );
+    if (confirmation) {
+      try {
+        const response = await fetch(
+          `http://localhost/react_php_local/backend/product/productBulkDelete.php`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ productIds: selectedProducts }),
+          }
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          setErrorMessage("");
+          setSuccessMessage(result.message);
+          setSelectedProducts([]);
+        } else {
+          setSuccessMessage("");
+          setErrorMessage(
+            result.message || "An error occurred during deletion!"
+          );
+        }
+
+        fetchProducts();
+      } catch (error) {
+        setSuccessMessage("");
+        setErrorMessage(
+          "An error occurred while deleting the products! Please try again later."
+        );
+      }
+    }
+  };
+
+  const cancelSelection = () => {
+    setSelectedProducts([]);
+  };
+
+  const handleImageClick = (image) => {
+    setPreviewImage(image);
+  };
+
+  const closeModal = () => {
+    setPreviewImage(null);
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="mb-3">Products</h1>
@@ -108,10 +170,23 @@ function ProductList() {
         </a>
       </div>
 
+      {/* Bulk delete button */}
+      {selectedProducts.length > 0 && (
+        <div className="mb-3">
+          <button className="btn btn-danger me-2" onClick={handleBulkDelete}>
+            Delete Selected Products
+          </button>
+          <button className="btn btn-success" onClick={cancelSelection}>
+            Unselect All
+          </button>
+        </div>
+      )}
+
       {/* Product List */}
       <table className="table table-bordered">
         <thead>
           <tr>
+            <th>Selected</th>
             <th>Product Id</th>
             <th>Product Name</th>
             <th>SKU</th>
@@ -124,6 +199,13 @@ function ProductList() {
           {products.length > 0 ? (
             products.map((product) => (
               <tr key={product.product_id}>
+                <td>
+                  <input
+                    type="checkbox"
+                    checked={selectedProducts.includes(product.product_id)}
+                    onChange={() => handleCheckboxChange(product.product_id)}
+                  />
+                </td>
                 <td>{product.product_id}</td>
                 <td>{product.product_name}</td>
                 <td>{product.sku}</td>
@@ -138,7 +220,13 @@ function ProductList() {
                           width: "100px",
                           height: "auto",
                           marginRight: "10px",
+                          cursor: "pointer",
                         }}
+                        onClick={() =>
+                          handleImageClick(
+                            `http://localhost/react_php_local/backend/images/${image}`
+                          )
+                        }
                       />
                     ))}
                   </div>
@@ -186,6 +274,49 @@ function ProductList() {
           </button>
         ))}
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="modal show d-block"
+          tabIndex="-1"
+          onClick={closeModal}
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <div
+            className="modal-dialog modal-dialog-centered"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Image Preview</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={closeModal}
+                ></button>
+              </div>
+              <div className="modal-body">
+                <img
+                  src={previewImage}
+                  alt="Product Preview"
+                  className="img-fluid w-100"
+                />
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={closeModal}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
