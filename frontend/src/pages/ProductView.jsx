@@ -238,6 +238,13 @@ function ProductView() {
                 Currently, this product is out of stock.
               </div>
             )}
+            <div className="d-flex justify-content-center mt-4">
+              <a href="http://localhost:5173/user">
+                <button type="button" class="btn btn-success">
+                  Go to Home Page
+                </button>
+              </a>
+            </div>
           </div>
         </div>
       </div>

@@ -38,6 +38,13 @@ function ProductsByCategory() {
   return (
     <>
       <CategoryMenu />
+      <div className="d-flex justify-content-end me-5">
+        <a href="http://localhost:5173/user">
+          <button type="button" class="btn btn-success">
+            Go to Home Page
+          </button>
+        </a>
+      </div>
       <div className="container my-5">
         <div className="row">
           {products.length > 0 ? (
