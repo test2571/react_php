@@ -14,6 +14,7 @@ import ProductForm from "./pages/ProductForm.jsx";
 import ProductList from "./pages/ProductList.jsx";
 import ResetPassword from "./components/ResetPassword.jsx";
 import UserLandingPage from "./pages/UserLandingPage.jsx";
+import ProductView from "./pages/ProductView.jsx";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/user" element={<UserLandingPage />} />
+          <Route path="/user/productView" element={<ProductView />} />
           <Route path="/register" element={<Register />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
           {/* protected dashboard route */}

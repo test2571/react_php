@@ -174,7 +174,7 @@ function UserLandingPage() {
                         )}
                       </p>
                       <a
-                        href=""
+                        href={`http://localhost:5173/user/productView?pid=${product.id}`}
                         className="btn btn-primary mt-auto"
                       >
                         View
