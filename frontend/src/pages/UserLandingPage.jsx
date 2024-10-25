@@ -8,7 +8,6 @@ function UserLandingPage() {
       .then((response) => response.json())
       .then((data) => {
         setFeaturedProducts(data.products);
-        console.log(featuredProducts);
       })
       .catch((error) => {
         console.error("Error fetching products:", error);

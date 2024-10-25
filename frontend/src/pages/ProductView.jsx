@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
+import Spinner from "../components/Spinner";
 
 function ProductView() {
   const [searchParams] = useSearchParams();
@@ -48,7 +49,7 @@ function ProductView() {
     setLiked((prevLiked) => !prevLiked);
   };
 
-  if (loading) return <p>Loading product...</p>;
+ if (loading) return <Spinner/>
   if (error) return <p>Error loading product: {error}</p>;
   if (!product) return <p>No product found.</p>;
 
