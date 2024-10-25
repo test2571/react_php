@@ -13,6 +13,10 @@ const AdminProvider = ({ children }) => {
     status: "",
   });
 
+  const updateAdminDetails = (updatedDetails) => {
+    setAdminDetails(updatedDetails);
+  };
+
   useEffect(() => {
     const fetchAdminDetails = async () => {
       if (adminId) {
@@ -93,7 +97,12 @@ const AdminProvider = ({ children }) => {
 
   return (
     <AdminContext.Provider
-      value={{ adminDetails, handleLoginContext, handleLogoutContext }}
+      value={{
+        adminDetails,
+        handleLoginContext,
+        handleLogoutContext,
+        updateAdminDetails,
+      }}
     >
       {children}
     </AdminContext.Provider>
