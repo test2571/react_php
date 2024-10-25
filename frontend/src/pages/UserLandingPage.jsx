@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import CategoryMenu from "../components/CategoryMenu.jsx";
 
 function UserLandingPage() {
  const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -59,6 +60,7 @@ function UserLandingPage() {
 
   return (
     <div>
+      <CategoryMenu/>
       {/* Hero Section */}
       <div className="container-fluid p-0">
         <div
