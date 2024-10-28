@@ -12,6 +12,19 @@ $admin_id = $data['admin_id'] ?? null;
 $response = ["success" => false];
 
 if ($field && $value && $admin_id) {
+    $currentValueQuery = "SELECT $field FROM admin WHERE admin_id = ?";
+    $stmt = $conn->prepare($currentValueQuery);
+    $stmt->bind_param("i", $admin_id);
+    $stmt->execute();
+    $currentResult = $stmt->get_result();
+    $currentRow = $currentResult->fetch_assoc();
+
+    if ($currentRow && $currentRow[$field] === $value) {
+        $response["success"] = true;
+        echo json_encode($response);
+        exit();
+    }
+
     if ($field === "username") {
         $checkQuery = "SELECT COUNT(*) AS count FROM admin WHERE username = ? AND admin_id != ?";
         $stmt = $conn->prepare($checkQuery);
