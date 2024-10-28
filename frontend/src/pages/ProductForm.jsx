@@ -193,23 +193,6 @@ function ProductForm() {
           } else {
             setMessage(data.message);
             setLoading(false);
-            setFormData({
-              productName: "",
-              sku: "",
-              color: "",
-              size: "",
-              description: "",
-              images: [],
-              category: "",
-              price: "",
-              discount: "",
-              stockQuantity: "",
-              mfrCost: "",
-              shippingCost: "",
-              minPrice: "",
-              status: "In Stock",
-            });
-            setFiles([]);
             setErrors({});
           }
         })
@@ -259,7 +242,7 @@ function ProductForm() {
                   onChange={handleChange}
                   name="sku"
                   className="form-control"
-                  placeholder="Enter Product Name"
+                  placeholder="Enter Product Sku"
                 />
                 {errors.sku && (
                   <small className="text-danger">{errors.sku}</small>
@@ -449,6 +432,7 @@ function ProductForm() {
                   type="number"
                   id="price"
                   min={1}
+                  step="0.01"
                   required
                   value={formData.price}
                   onChange={handleChange}
@@ -468,6 +452,7 @@ function ProductForm() {
                   type="number"
                   id="discount"
                   min={0}
+                  step="0.01"
                   value={formData.discount}
                   onChange={handleChange}
                   required
@@ -511,6 +496,7 @@ function ProductForm() {
                   type="number"
                   id="mfrCost"
                   min={0}
+                  step="0.01"
                   required
                   value={formData.mfrCost}
                   onChange={handleChange}
@@ -530,6 +516,7 @@ function ProductForm() {
                   type="number"
                   id="shippingCost"
                   min={0}
+                  step="0.01"
                   value={formData.shippingCost}
                   onChange={handleChange}
                   required
@@ -549,6 +536,7 @@ function ProductForm() {
                   type="number"
                   id="minPrice"
                   min={1}
+                  step="0.01"
                   required
                   value={formData.minPrice}
                   onChange={handleChange}
