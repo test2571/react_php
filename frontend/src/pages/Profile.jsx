@@ -159,15 +159,15 @@ function Profile() {
     }
   };
 
-   useEffect(() => {
-     if (error || successMessage) {
-       const timer = setTimeout(() => {
-         setError("");
-         setSuccessMessage("");
-       }, 4000);
-       return () => clearTimeout(timer);
-     }
-   }, [error, successMessage]);
+  useEffect(() => {
+    if (error || successMessage) {
+      const timer = setTimeout(() => {
+        setError("");
+        setSuccessMessage("");
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, successMessage]);
 
   const renderStatusIcon = (status) => {
     return status === "Active" ? (
@@ -175,6 +175,42 @@ function Profile() {
     ) : (
       <FaTimesCircle size={30} className="text-danger me-2" />
     );
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmDelete = confirm(
+      "Are you sure you want to delete your account !"
+    );
+    if (confirmDelete) {
+      try {
+        const response = await fetch(
+          "http://localhost/react_php_local/backend/admin/delete.php",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              admin_id: adminDetails.admin_id,
+            }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          setSuccessMessage("Account deleted successfully. Please wait while we redirect you...");
+          setTimeout(() => {
+            handleLogoutContext();
+            navigate("/");
+          },4000);
+        } else {
+          setError("Failed to delete account. Please try again.");
+        }
+      } catch (error) {
+        setError("Server error. Please try again later.");
+      }
+    }
   };
 
   return (
@@ -402,6 +438,9 @@ function Profile() {
           </Link>
           <button onClick={handleLogout} className="btn btn-light me-2">
             Logout
+          </button>
+          <button onClick={handleDeleteAccount} className="btn btn-dark me-2">
+            Delete Account
           </button>
         </div>
       </div>
