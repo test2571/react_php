@@ -29,7 +29,7 @@ function App() {
           <Route path="/user/productsbycategory" element={<ProductsByCategory />} />
           <Route path="/register" element={<Register />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
-          {/* protected dashboard route */}
+          {/* protected route */}
           <Route
             path="/dashboard"
             element={

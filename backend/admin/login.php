@@ -25,7 +25,7 @@ if (isset($data->username) && isset($data->password)) {
 
         $hashedPassword = md5($password);
 
-        $sql = "SELECT * FROM admin WHERE username = ? AND password = ?";
+        $sql = "SELECT admin_id FROM admin WHERE username = ? AND password = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('ss', $username, $hashedPassword);
         $stmt->execute();
