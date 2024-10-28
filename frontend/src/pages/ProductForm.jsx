@@ -593,12 +593,19 @@ function ProductForm() {
               </div>
             </form>
             <div className="mt-4 text-center">
-              <Link
-                to="/dashboard"
-                className="text-decoration-none text-white bg-dark p-2 rounded"
-              >
-                Back to Dashboard
-              </Link>
+              {allImagesDeleted ? (
+                <p className="text-danger">
+                  All images have been deleted. You cannot return to the
+                  dashboard for this product.
+                </p>
+              ) : (
+                <Link
+                  to="/dashboard"
+                  className="text-decoration-none text-white bg-dark p-2 rounded"
+                >
+                  Back to Dashboard
+                </Link>
+              )}
             </div>
           </div>
         </div>
