@@ -16,6 +16,7 @@ import ResetPassword from "./components/ResetPassword.jsx";
 import UserLandingPage from "./pages/UserLandingPage.jsx";
 import ProductView from "./pages/ProductView.jsx";
 import ProductsByCategory from "./pages/ProductsByCategory.jsx";
+import NotFoundPage from "./components/NotFoundPage.jsx";
 
 function App() {
   return (
@@ -26,9 +27,13 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/user" element={<UserLandingPage />} />
           <Route path="/user/productView" element={<ProductView />} />
-          <Route path="/user/productsbycategory" element={<ProductsByCategory />} />
+          <Route
+            path="/user/productsbycategory"
+            element={<ProductsByCategory />}
+          />
           <Route path="/register" element={<Register />} />
           <Route path="/resetPassword" element={<ResetPassword />} />
+          <Route path="*" element={<NotFoundPage />} />
           {/* protected route */}
           <Route
             path="/dashboard"
